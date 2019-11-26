@@ -1,0 +1,60 @@
+databaseChangeLog:
+- changeSet:
+    id: 1
+    author: vmakarenko
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              primaryKeyName: user_pkey
+            name: id
+            type: bigint
+        - column:
+            name: username
+            type: VARCHAR(255)
+            constraints:
+              unique: true
+        - column:
+            name: password
+            type: VARCHAR(255)
+        - column:
+            name: enabled
+            type: boolean
+            defaultValueBoolean: true
+        - column:
+            name: role
+            type: VARCHAR(255)
+            constraints:
+              nullable: false
+        tableName: USER
+
+- changeSet:
+    id: 2
+    author: vmakarenko
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: username
+            type: VARCHAR(255)
+            constraints:
+              foreignKeyName: fk_to_do_item_username
+              references: user(username)
+              nullable: false
+        - column:
+            name: text
+            type: VARCHAR(255)
+        - column:
+            name: checked
+            type: boolean
+        - column:
+              autoIncrement: true
+              constraints:
+                  primaryKey: true
+                  primaryKeyName: to_do_item_pkey
+              name: id
+              type: bigint
+        tableName: to_do_item
