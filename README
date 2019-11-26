@@ -1,0 +1,47 @@
+1. Spring Security is used for authentication and authorisation. As far as by default it is configured for form-based auth - I created custom filter CustomUsernamePasswordAuthenticationFilter (to parse JSON instead of form-data)
+CustomAuthenticationSuccessHandler is used to return 200 instead of 302, because we want to have fully REST API
+In SecurityConfiguration.java we have all remaining security config.
+Important things to check:
+- are passwords secure? Do we encrypt them? Do we use Strings or char arrays?
+- how do we handle users and roles? We can create custom queries and store everything in one table, like I did, or use Spring default preconfigured setup
+- did candidate changed everything to fit REST standards - json login request, correct response codes?
+- is configuration clear and self-describing or covered with clear comments?
+- is there any redundant configuration?
+
+
+2. SpringConfiguration.java - here we have implementation of datasource. Any kind of datasource config can be used.
+- better to keep configuration in properties or other external file
+
+3. RestResponseEntityExceptionHandler.java - generic exception handler
+- it could be good idea to handle common exceptions like NotFound or BadReques in one place using ControllerAdvice or something like this
+
+4. dto package
+- Check candidate is using dto instead of working directly with entities in controller
+- Check we are not sending back user entity with password
+- Check we are using some mapper library to translate entity to dto and back (check Services)
+
+5. Entity package
+- Check entities are compact, containing all necessary fields but not more than that
+- There should be User, ToDoItem, but also can be Role/Authority
+
+6. Migration management
+- It is good to use some migration management. Table auto-creation by Hibernate is not recommended.
+- Flyway or Liquibase could be good solution here
+- Check tables are created with all necessary contraints (unique username, foreign keys etc) and types
+
+7. Integration tests
+- Check that tests are running successfully and covering enough code - check document for details
+- Here we are using @SpringBootTest and @AutoConfigureMockMvc, it is a bit outdated, but any other working setup is OK.
+- On requests we are validating responses and cookies for login/logout requests.
+
+8. Unit tests TBD
+9. Controllers
+- All in dedicated package
+- Working with DTO
+- No business logic
+- Request with JSON RequestBody where possible
+- Using different and logically correct HTTP methods (POST for create, DELETE for delete, etc)
+10. Repositories
+- No direct using native SQL
+- Using declarative Spring Data as much as possible (if candidate have chosen Spring stack)
+- No business logic other that preparing SQL request in custom repositories (we don't have one here, but it could be there)
