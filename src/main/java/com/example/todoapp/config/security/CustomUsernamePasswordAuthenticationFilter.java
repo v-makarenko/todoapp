@@ -11,7 +11,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
+/**
+ * Custom filter to replace UsernamePasswordAuthenticationFilter
+ * to be able to retrieve username and password from JSON
+ */
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
     private static final String CONTENT_TYPE_JSON = "application/json";
     private String jsonUsername;
     private String jsonPassword;
@@ -20,9 +25,10 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     protected String obtainPassword(HttpServletRequest request) {
         String password = null;
 
-        if ("application/json".equals(request.getHeader("Content-Type"))) {
+        String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
+        if (!StringUtils.isEmpty(contentType) && contentType.contains(CONTENT_TYPE_JSON)) {
             password = this.jsonPassword;
-        }else{
+        } else {
             password = super.obtainPassword(request);
         }
 
@@ -30,12 +36,13 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     }
 
     @Override
-    protected String obtainUsername(HttpServletRequest request){
+    protected String obtainUsername(HttpServletRequest request) {
         String username = null;
 
-        if ("application/json".equals(request.getHeader("Content-Type"))) {
+        String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
+        if (!StringUtils.isEmpty(contentType) && contentType.contains(CONTENT_TYPE_JSON)) {
             username = this.jsonUsername;
-        }else{
+        } else {
             username = super.obtainUsername(request);
         }
 
@@ -43,8 +50,8 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response){
-        String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);       // We use this
         if (!StringUtils.isEmpty(contentType) && contentType.contains(CONTENT_TYPE_JSON)) {
             try {
                 /*
@@ -54,7 +61,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 String line = null;
 
                 BufferedReader reader = request.getReader();
-                while ((line = reader.readLine()) != null){
+                while ((line = reader.readLine()) != null) {
                     sb.append(line);
                 }
 
@@ -69,7 +76,8 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             }
         }
 
-        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(jsonUsername, jsonPassword);
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(jsonUsername,
+            jsonPassword);
         setDetails(request, authRequest);
         return this.getAuthenticationManager().authenticate(authRequest);
     }
